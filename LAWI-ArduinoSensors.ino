@@ -1,8 +1,13 @@
+#include <arduino.h>
 #include "DHT.h"
 #include "Adafruit_BME280.h"
 
+#include "MHZ19b.h"
 #include "package_sender.h"
-#include "defines.h"
+
+#define int int32_t
+#define long int64_t
+#define MBR_TO_MMHG 0.75006168
 
 Adafruit_BME280 bme;
 bool bme_init;
@@ -11,8 +16,8 @@ package_sender sender(package::getLength());
 
 void setup() {
   Serial.begin(9600);
-  
   bme_init = bme.begin();
+  
   while (!Serial);
 }
 
@@ -40,6 +45,6 @@ void loop() {
 
   sender.setData(pack);
   sender.send();
-
-  delay (10*1000);
+  
+  delay(10*1000);
 }

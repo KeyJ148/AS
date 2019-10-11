@@ -1,6 +1,7 @@
 #pragma once
 
-#include "defines.h"
+#define int int32_t
+#define long int64_t
 
 void intToByteArray(int, byte*);
 void floatToByteArray(float, byte*);
