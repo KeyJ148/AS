@@ -12,6 +12,7 @@ private:
 public:
   MHZ19b(int, int);
   ~MHZ19b();
-  int getInit();
+  bool getInit();
+  bool setABC(bool);
   result<int> getCO2();
 };
