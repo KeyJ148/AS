@@ -66,3 +66,23 @@ result<int> MHZ19b::getCO2(){
 
   return result<int>(ppm, true);
 }
+
+result<vector<byte>> MHZ19b::sendCommand(const byte command[]){
+  if (sizeof(command) != 9) return result<vector<byte>>(vector<byte>(0), false);
+  swSerial->write(command, 9);
+  
+  unsigned char response[9];
+  swSerial->readBytes(response, 9);
+
+  return result<vector<byte>>(vector<byte>(9, response), checkResponse(response));
+}
+
+bool MHZ19b::checkResponse(const byte response[]){
+  if (sizeof(response) != 9) return false;
+
+  byte crc = 0;
+  for (int i = 1; i < 8; i++) crc += response[i];
+  crc = 255 - crc; crc++;
+  
+  return !(response[0] == 0xFF && response[1] == 0x86 && response[8] == crc);
+}
