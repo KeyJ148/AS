@@ -31,9 +31,9 @@ bool MHZ19b::setABC(bool abc){
 result<int> MHZ19b::getCO2(){
   result<vector<byte>> response = sendCommand(GET_CO2);
   
-  unsigned int responseHigh = (unsigned int) response.val[2];
-  unsigned int responseLow = (unsigned int) response.val[3];
-  unsigned long ppm = (256*responseHigh) + responseLow;
+  int32_t responseHigh = response.val[2];
+  int32_t responseLow = response.val[3];
+  int32_t ppm = (256*responseHigh) + responseLow;
 
   return result<int>(ppm, response.valid);
 }
@@ -41,13 +41,13 @@ result<int> MHZ19b::getCO2(){
 result<vector<byte>> MHZ19b::sendCommand(const byte command[]){
   swSerial->write(command, 9);
   
-  unsigned char response[9];
+  byte response[9];
   swSerial->readBytes(response, 9);
   
   return result<vector<byte>>(vector<byte>(9, response), checkResponse(command[2], response));
 }
 
-bool MHZ19b::checkResponse(byte commandID, const unsigned char response[]){
+bool MHZ19b::checkResponse(byte commandID, const byte response[]){
   byte crc = 0;
   for (int i = 1; i < 8; i++) crc += response[i];
   crc = 255 - crc; crc++;

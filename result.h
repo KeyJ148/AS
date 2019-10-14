@@ -1,5 +1,7 @@
 #pragma once
 
+#include <arduino.h>
+
 template<class T> 
 struct result{
   T val;
