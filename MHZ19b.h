@@ -10,19 +10,19 @@ class MHZ19b{
 public:
   MHZ19b(int, int);
   ~MHZ19b();
+
+  bool init();
   bool getInit();
   bool setABC(bool);
   result<int> getCO2();
 
 private:
-  const byte INIT_MAX_5000[] = {0xFF, 0x01, 0x99, 0x00, 0x00, 0x00, 0x13, 0x88, 0xCB};
-  const byte ABC_ON[] =        {0xFF, 0x01, 0x79, 0xA0, 0x00, 0x00, 0x00, 0x00, 0xE6};
-  const byte ABC_OFF[] =       {0xFF, 0x01, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86};
-  const byte GET_CO2[] =       {0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79};
+  static const byte INIT_MAX_5000[], ABC_ON[], ABC_OFF[], GET_CO2[];
 
   SoftwareSerial* swSerial;
-  bool init;
+  bool initResult = false;
+  int RX, TX;
 
   result<vector<byte>> sendCommand(const byte []);
-  bool checkResponse(const byte []);
+  bool checkResponse(byte, const byte []);
 };

@@ -1,18 +1,27 @@
 #include "MHZ19b.h"
 
-MHZ19b::MHZ19b(int RX, int TX){
-  swSerial = new SoftwareSerial(RX, TX);
-  swSerial->begin(9600);
+const byte MHZ19b::INIT_MAX_5000[] = {0xFF, 0x01, 0x99, 0x00, 0x00, 0x00, 0x13, 0x88, 0xCB};
+const byte MHZ19b::ABC_ON[] =        {0xFF, 0x01, 0x79, 0xA0, 0x00, 0x00, 0x00, 0x00, 0xE6};
+const byte MHZ19b::ABC_OFF[] =       {0xFF, 0x01, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x86};
+const byte MHZ19b::GET_CO2[] =       {0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79};
 
-  init = sendCommand(INIT_MAX_5000).valid;
+MHZ19b::MHZ19b(int RX, int TX) : RX(RX), TX(TX){
+  swSerial = new SoftwareSerial(RX, TX);
 }
 
 MHZ19b::~MHZ19b(){
   delete swSerial;
 }
 
+bool MHZ19b::init(){
+  swSerial->begin(9600);  
+  initResult = sendCommand(INIT_MAX_5000).valid;
+  
+  return initResult;
+}
+
 bool MHZ19b::getInit(){
-  return init;
+  return initResult;
 }
 
 bool MHZ19b::setABC(bool abc){
@@ -20,7 +29,7 @@ bool MHZ19b::setABC(bool abc){
 }
 
 result<int> MHZ19b::getCO2(){
-  result<vector<byte>> response = sendCommand(INIT_MAX_5000);
+  result<vector<byte>> response = sendCommand(GET_CO2);
   
   unsigned int responseHigh = (unsigned int) response.val[2];
   unsigned int responseLow = (unsigned int) response.val[3];
@@ -30,21 +39,18 @@ result<int> MHZ19b::getCO2(){
 }
 
 result<vector<byte>> MHZ19b::sendCommand(const byte command[]){
-  if (sizeof(command) != 9) return result<vector<byte>>(vector<byte>(0), false);
   swSerial->write(command, 9);
   
   unsigned char response[9];
   swSerial->readBytes(response, 9);
-
+  
   return result<vector<byte>>(vector<byte>(9, response), checkResponse(command[2], response));
 }
 
-bool MHZ19b::checkResponse(byte commandID, const byte response[]){
-  if (sizeof(response) != 9) return false;
-
+bool MHZ19b::checkResponse(byte commandID, const unsigned char response[]){
   byte crc = 0;
   for (int i = 1; i < 8; i++) crc += response[i];
   crc = 255 - crc; crc++;
   
-  return !(response[0] == 0xFF && response[1] == commandID && response[8] == crc);
+  return (response[0] == 0xFF && response[1] == commandID && response[8] == crc);
 }
