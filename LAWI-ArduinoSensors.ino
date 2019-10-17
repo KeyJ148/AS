@@ -1,50 +1,37 @@
 #include <arduino.h>
-#include "DHT.h"
-#include "Adafruit_BME280.h"
 
+#include "BME280.h"
 #include "MHZ19b.h"
 #include "package_sender.h"
 
-#define int int32_t
-#define long int64_t
-#define MBR_TO_MMHG 0.75006168
-
-Adafruit_BME280 bme;
-bool bme_init;
-
+BME280 bme;
+MHZ19b mhz(A0, A1);
 package_sender sender(package::getLength());
 
 void setup() {
   Serial.begin(9600);
-  bme_init = bme.begin();
-  
   while (!Serial);
+  
+  mhz.init(); mhz.setABC(false);
+  bme.init();
 }
 
 void loop() {
-  float t = 0, h = 0, p = 0;
-  bool bme_status = 1;
+  result<float> t = (bme.getInit())? bme.getTemperature() : result<float>(0, false);
+  result<float> h = (bme.getInit())? bme.getHumidity() : result<float>(0, false);
+  result<float> p = (bme.getInit())? bme.getPressure() : result<float>(0, false);
+  result<int32_t> co2 = (mhz.getInit())? mhz.getCO2() : result<int32_t>(0, false);
   
-  if (bme_init){
-    t = bme.readTemperature();
-    h = bme.readHumidity();
-    p = bme.readPressure() / 100 * MBR_TO_MMHG;
-
-    if (isnan(t)) bme_status = 0;
-    if (isnan(h) || h == 0) bme_status = 0;
-    if (isnan(p) || p == 0) bme_status = 0;
-  } else {
-    bme_status = 0;
-  }
-
   package pack;
-  pack.t = t;
-  pack.h = h;
-  pack.p = p;
-  pack.bme_status = bme_status;
+  pack.t = t.val;
+  pack.h = h.val;
+  pack.p = p.val;
+  pack.co2 = co2.val;
+  pack.bme_status = t.valid && h.valid && p.valid;
+  pack.mhz_status = co2.valid;
 
   sender.setData(pack);
   sender.send();
   
-  delay(10*1000);
+  delay(5*1000);
 }
