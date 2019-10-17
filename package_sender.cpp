@@ -28,12 +28,12 @@ int package_sender::getLength(){
   return LENGTH_SEPARATOR+lengthData+LENGTH_HASH;
 }
 
-int package_sender::getHash(){
-  int hash = 0;
-  int pow_val = 1;
+int32_t package_sender::getHash(){
+  int32_t hash = 0;
+  int32_t pow_val = 1;
   
   for (int i = LENGTH_SEPARATOR; i < LENGTH_SEPARATOR+lengthData; i++){
-    hash = hash + ((int) buf[i])*pow_val;   
+    hash = hash + ((int32_t) buf[i])*pow_val;   
     pow_val = pow_val * P;
   }
     
@@ -44,11 +44,9 @@ package_sender::~package_sender(){
   delete[] buf;
 }
 
-void intToByteArray(int val, byte* b){
-  b[0] = (val & 0xff000000) >> 24;
-  b[1] = (val & 0x00ff0000) >> 16;
-  b[2] = (val & 0x0000ff00) >> 8;
-  b[3] = (val & 0x000000ff) >> 0;
+void intToByteArray(int32_t val, byte* b){
+  byte* p = reinterpret_cast<byte*>(&val);
+  for (int i = 0; i < 4; ++i) b[3-i] = p[i];
 }
 
 void floatToByteArray(float val, byte* b){
@@ -56,8 +54,8 @@ void floatToByteArray(float val, byte* b){
   for (int i = 0; i < 4; ++i) b[i] = p[i];
 }
 
-int byteArrayToInt(byte* b){
-  int res = 0;
+int32_t byteArrayToInt(byte* b){
+  int32_t res = 0;
   for(int i=0; i<4; i++){
     res |= static_cast<int>(b[i]) << 32-(i+1)*8;
   }
