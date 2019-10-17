@@ -14,7 +14,7 @@ public:
   bool init();
   bool getInit();
   bool setABC(bool);
-  result<int> getCO2();
+  result<int32_t> getCO2();
 
 private:
   static const byte INIT_MAX_5000[], ABC_ON[], ABC_OFF[], GET_CO2[];

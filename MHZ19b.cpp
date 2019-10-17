@@ -28,14 +28,14 @@ bool MHZ19b::setABC(bool abc){
   return sendCommand((abc)? ABC_ON : ABC_OFF).valid;
 }
 
-result<int> MHZ19b::getCO2(){
+result<int32_t> MHZ19b::getCO2(){
   result<vector<byte>> response = sendCommand(GET_CO2);
   
   int32_t responseHigh = response.val[2];
   int32_t responseLow = response.val[3];
   int32_t ppm = (256*responseHigh) + responseLow;
 
-  return result<int>(ppm, response.valid);
+  return result<int32_t>(ppm, response.valid);
 }
 
 result<vector<byte>> MHZ19b::sendCommand(const byte command[]){
