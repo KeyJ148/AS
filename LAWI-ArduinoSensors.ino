@@ -2,11 +2,11 @@
 
 #include "BME280.h"
 #include "MHZ19b.h"
-#include "package_sender.h"
+#include "printer.h"
 
 BME280 bme;
 MHZ19b mhz(A0, A1);
-package_sender sender(package::getLength());
+printer printerToUSB(printer::MODE_STRING);
 
 void setup() {
   Serial.begin(9600);
@@ -21,17 +21,7 @@ void loop() {
   result<float> h = (bme.getInit())? bme.getHumidity() : result<float>(0, false);
   result<float> p = (bme.getInit())? bme.getPressure() : result<float>(0, false);
   result<int32_t> co2 = (mhz.getInit())? mhz.getCO2() : result<int32_t>(0, false);
-  
-  package pack;
-  pack.t = t.val;
-  pack.h = h.val;
-  pack.p = p.val;
-  pack.co2 = co2.val;
-  pack.bme_status = t.valid && h.valid && p.valid;
-  pack.mhz_status = co2.valid;
 
-  sender.setData(pack);
-  sender.send();
-  
+  printerToUSB.print(t.val, h.val, p.val, co2.val, (t.valid && h.valid && p.valid), co2.valid);
   delay(5*1000);
 }

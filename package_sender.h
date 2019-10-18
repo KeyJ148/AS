@@ -42,6 +42,7 @@ public:
   byte* getBytes();
   int getLength();
   int32_t getHash();
+  
 private: 
   const int LENGTH_SEPARATOR = 4;
   const int LENGTH_HASH = 4;
