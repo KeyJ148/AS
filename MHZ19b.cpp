@@ -34,7 +34,10 @@ result<int32_t> MHZ19b::getCO2(){
   int32_t responseHigh = response.val[2];
   int32_t responseLow = response.val[3];
   int32_t ppm = (256*responseHigh) + responseLow;
-
+  
+  //Иногда сразу после запуска датчик возвращает не верные 410 ppm, не смотря на response.valid = true
+  if (ppm == 410) response.valid = false; 
+  
   return result<int32_t>(ppm, response.valid);
 }
 

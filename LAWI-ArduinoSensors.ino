@@ -6,7 +6,7 @@
 
 BME280 bme;
 MHZ19b mhz(A0, A1);
-printer printerToUSB(printer::MODE_STRING);
+printer printerToUSB(printer::MODE_HASH);
 
 void setup() {
   Serial.begin(9600);
